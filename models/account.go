@@ -1,9 +1,14 @@
 package models
 
+import (
+	"time"
+)
+
 type Account struct {
-	Id       string `json:"id"`
-	UserName string `json:"userName"`
-	Email    string `json:"email"`
-	Password string `json:"password,omitempty"`
-	WebSite  string `json:"webSite"`
+	ID        int       `storm:"id,increment"`
+	UserName  string    `storm:"index,unique"`
+	Email     string    `storm:"unique"`
+	Password  string    `json:"password,omitempty"`
+	WebSite   string    `json:"webSite"`
+	CreatedAt time.Time `storm:"index"`
 }
