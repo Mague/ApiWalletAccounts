@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/Mague/ApiWalletAccounts/models"
@@ -22,19 +23,32 @@ func (this User) Load(engine *gin.Engine) {
 	{
 		accounts.GET("/", this.all)
 		accounts.POST("/add", this.add)
+		accounts.GET("/:id", this.get)
 	}
 }
+func (this User) get(ctx *gin.Context) {
+	db, err := storm.Open("wallet.db")
+	if err != nil {
+		fmt.Println("error al abrir la base de datos")
+	} else {
+		fmt.Println("Conexion exitosa")
+	}
+	var rUser models.User
+	if userId, err := strconv.Atoi(ctx.Param("id")); err == nil {
 
+		fmt.Println(&rUser)
+
+		err = db.One("ID", userId, &rUser)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	db.Close()
+	ctx.JSON(http.StatusOK, &rUser)
+}
 func (this User) all(ctx *gin.Context) {
 	db, err := storm.Open("wallet.db")
-	// data := models.Account{
-	// 	UserName:  "mague",
-	// 	Email:     "turronvenezolano@gmail.com",
-	// 	Password:  "enmanuel",
-	// 	WebSite:   "enmanuelmolina.com",
-	// 	CreatedAt: time.Now(),
-	// }
-	// err = db.Save(&data)
 	if err != nil {
 		fmt.Println("Error al abrir la base de datos")
 	} else {
@@ -68,6 +82,7 @@ func (this User) add(ctx *gin.Context) {
 		CreatedAt: time.Now(),
 	}
 	err = db.Save(&data)
+	fmt.Println(err)
 	db.Close()
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{

@@ -5,7 +5,7 @@ import (
 )
 
 type User struct {
-	ID        int       `storm:"id,increment"`
+	ID        int64     `storm:"id,increment"`
 	UserName  string    `storm:"index,unique"`
 	Email     string    `storm:"unique"`
 	Password  string    `json:"Password,omitempty"`
