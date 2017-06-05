@@ -19,7 +19,6 @@ type Account struct {
 func (this Account) Load(engine *gin.Engine) {
 	this.router = engine
 	// this.db = db
-	fmt.Println("rutas cargadas")
 	accounts := this.router.Group("/accounts")
 	{
 		accounts.GET("/", this.all)

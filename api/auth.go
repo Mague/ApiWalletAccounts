@@ -49,6 +49,7 @@ func init() {
 func (this Auth) Load(engine *gin.Engine) {
 	this.router = engine
 	// this.db = db
+	fmt.Println("Auth success")
 	auth := this.router.Group("/auth")
 	{
 		auth.POST("/sign-in", this.signin)
