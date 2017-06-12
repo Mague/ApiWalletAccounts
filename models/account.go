@@ -5,9 +5,9 @@ import (
 )
 
 type Account struct {
-	ID        int       `storm:"id,increment"`
-	UserName  string    `storm:"index,unique"`
-	Email     string    `storm:"unique"`
+	ID        int    `storm:"id,increment"`
+	UserName  string `storm:"index"`
+	Email     string
 	Password  string    `json:"password,omitempty"`
 	WebSite   string    `json:"webSite"`
 	CreatedAt time.Time `storm:"index"`

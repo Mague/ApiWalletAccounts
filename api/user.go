@@ -48,8 +48,6 @@ func (this User) all(ctx *gin.Context) {
 		err := db.AllByIndex("ID", &rUsers, storm.Reverse())
 		if err != nil {
 			fmt.Println("Error al obtener las cuentas")
-		} else {
-			fmt.Println(&rUsers)
 		}
 	})
 	// err = db.Select(q.Eq("UserName", "mague")).Find(&rUsers)
