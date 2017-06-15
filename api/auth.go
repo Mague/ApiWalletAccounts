@@ -78,7 +78,14 @@ func (this Auth) signin(ctx *gin.Context) {
 		}
 		user.Password = ""
 		token := utils.NewJWT(user, privateKey)
-		result := models.Token{Token: token}
+		result := gin.H{
+			"token": token,
+			"user": gin.H{
+				"Id":       user.ID,
+				"UserName": user.UserName,
+				"Email":    user.Email,
+			},
+		}
 
 		ctx.JSON(http.StatusOK, result)
 	}

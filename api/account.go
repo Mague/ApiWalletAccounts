@@ -21,22 +21,27 @@ func (this Account) Load(engine *gin.Engine) {
 	// this.db = db
 	accounts := this.router.Group("/accounts")
 	{
-		accounts.GET("/", this.all)
+		accounts.GET("/:id", this.get)
 		accounts.POST("/add", this.add)
 	}
 }
-func (this Account) all(ctx *gin.Context) {
+func (this Account) get(ctx *gin.Context) {
 	var rAccounts []models.Account
 	var err error
+	id := ctx.Params.ByName("id")
 	utils.Query(func(db *storm.DB) {
-		err = db.AllByIndex("ID", &rAccounts, storm.Reverse())
+		err = db.Find("CurrentUser", id, &rAccounts, storm.Reverse())
 		if err != nil {
 			fmt.Println("Error al obtener las cuentas")
 		} else {
 			fmt.Println(&rAccounts)
 		}
 	})
-	ctx.JSON(http.StatusOK, &rAccounts)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, nil)
+	} else {
+		ctx.JSON(http.StatusOK, &rAccounts)
+	}
 }
 
 func (this Account) add(ctx *gin.Context) {
