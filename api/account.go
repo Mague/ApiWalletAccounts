@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Mague/ApiWalletAccounts/middlewares"
 	"github.com/Mague/ApiWalletAccounts/models"
+	"github.com/Mague/ApiWalletAccounts/utils"
 	"github.com/asdine/storm"
 	"github.com/gin-gonic/gin"
 )
@@ -13,55 +15,38 @@ import (
 type Account struct {
 	ctx    *gin.Context
 	router *gin.Engine
-	db     *storm.DB
 }
 
 func (this Account) Load(engine *gin.Engine) {
 	this.router = engine
 	// this.db = db
-	fmt.Println("rutas cargadas")
-	accounts := this.router.Group("/accounts")
+	accounts := this.router.Group("/accounts", middlewares.EnsureLoggedIn())
 	{
-		accounts.GET("/", this.all)
+		accounts.GET("/:id", this.get)
 		accounts.POST("/add", this.add)
 	}
 }
-func (this Account) all(ctx *gin.Context) {
-	db, err := storm.Open("wallet.db")
-	// data := models.Account{
-	// 	UserName:  "mague",
-	// 	Email:     "turronvenezolano@gmail.com",
-	// 	Password:  "enmanuel",
-	// 	WebSite:   "enmanuelmolina.com",
-	// 	CreatedAt: time.Now(),
-	// }
-	// err = db.Save(&data)
-	if err != nil {
-		fmt.Println("Error al abrir la base de datos")
-	} else {
-		fmt.Println("Conexion exitosa")
-	}
+func (this Account) get(ctx *gin.Context) {
 	var rAccounts []models.Account
-
-	// err = db.Select(q.Eq("UserName", "mague")).Find(&rAccounts)
-	err = db.AllByIndex("ID", &rAccounts, storm.Reverse())
+	var err error
+	id := ctx.Params.ByName("id")
+	utils.Query(func(db *storm.DB) {
+		err = db.Find("CurrentUser", id, &rAccounts, storm.Reverse())
+		if err != nil {
+			fmt.Println("Error al obtener las cuentas")
+		} else {
+			fmt.Println(&rAccounts)
+		}
+	})
 	if err != nil {
-		fmt.Println("Error al obtener las cuentas")
+		ctx.JSON(http.StatusNotFound, nil)
 	} else {
-		fmt.Println(&rAccounts)
+		ctx.JSON(http.StatusOK, &rAccounts)
 	}
-	db.Close()
-	ctx.JSON(http.StatusOK, &rAccounts)
 }
 
 func (this Account) add(ctx *gin.Context) {
-	fmt.Println("accounts/add")
-	db, err := storm.Open("wallet.db")
-	if err != nil {
-		fmt.Println("Error al abrir la base de datos")
-	} else {
-		fmt.Println("Conexion exitosa")
-	}
+	var err error
 	data := models.Account{
 		UserName:  ctx.PostForm("userName"),
 		Email:     ctx.PostForm("email"),
@@ -69,8 +54,9 @@ func (this Account) add(ctx *gin.Context) {
 		WebSite:   ctx.PostForm("webSite"),
 		CreatedAt: time.Now(),
 	}
-	err = db.Save(&data)
-	db.Close()
+	utils.Query(func(db *storm.DB) {
+		err = db.Save(&data)
+	})
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Error al añadir al usuario",
@@ -80,5 +66,4 @@ func (this Account) add(ctx *gin.Context) {
 			"message": "Usuario añadido correctamente",
 		})
 	}
-
 }
