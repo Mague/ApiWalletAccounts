@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Mague/ApiWalletAccounts/middlewares"
 	"github.com/Mague/ApiWalletAccounts/models"
 	"github.com/Mague/ApiWalletAccounts/utils"
 	"github.com/asdine/storm"
@@ -19,7 +20,7 @@ type Account struct {
 func (this Account) Load(engine *gin.Engine) {
 	this.router = engine
 	// this.db = db
-	accounts := this.router.Group("/accounts")
+	accounts := this.router.Group("/accounts", middlewares.EnsureLoggedIn())
 	{
 		accounts.GET("/:id", this.get)
 		accounts.POST("/add", this.add)

@@ -1,49 +1,19 @@
 package api
 
 import (
-	"crypto/rsa"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/Mague/ApiWalletAccounts/models"
 	"github.com/Mague/ApiWalletAccounts/utils"
 	"github.com/asdine/storm"
 	"github.com/asdine/storm/q"
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
 type Auth struct {
 	ctx    *gin.Context
 	router *gin.Engine
-}
-
-var (
-	privateKey *rsa.PrivateKey
-	publicKey  *rsa.PublicKey
-)
-
-func init() {
-	// log.Fatal("init")
-	privateBytes, err := ioutil.ReadFile("./ssl/private.rsa")
-	if err != nil {
-		log.Fatal("No se pudo leer el archivo privado")
-	}
-	publicBytes, err := ioutil.ReadFile("./ssl/public.rsa.pub")
-	if err != nil {
-		log.Fatal("No se pudo leer el archivo privado")
-	}
-
-	privateKey, err = jwt.ParseRSAPrivateKeyFromPEM(privateBytes)
-	if err != nil {
-		log.Fatal("No se pudo hacer el parse a privateKey")
-	}
-	publicKey, err = jwt.ParseRSAPublicKeyFromPEM(publicBytes)
-	if err != nil {
-		log.Fatal("No se pudo hacer el parse a publicKey")
-	}
 }
 
 func (this Auth) Load(engine *gin.Engine) {
@@ -77,7 +47,7 @@ func (this Auth) signin(ctx *gin.Context) {
 			return
 		}
 		user.Password = ""
-		token := utils.NewJWT(user, privateKey)
+		token := utils.NewJWT(user)
 		result := gin.H{
 			"token": token,
 			"user": gin.H{
